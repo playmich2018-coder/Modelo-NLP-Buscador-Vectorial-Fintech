@@ -1,28 +1,27 @@
-# 🧠 Motor de Búsqueda Semántica (RAG) para Políticas Fintech
+# 🏦 Microservicio RAG con ChromaDB (Fintech)
 
-## 📖 ¿Para qué sirve y por qué utilizarlo?
-En la banca y el sector Fintech, las normativas y políticas de crédito son extensas y complejas. Los motores de búsqueda tradicionales basados en palabras clave (keyword search) fallan cuando el usuario emplea sinónimos o lenguaje coloquial. 
-1. **Búsqueda por Conceptos:** Permite encontrar la normativa correcta evaluando la intención de la pregunta, no la coincidencia exacta de palabras.
-2. **Base para GenAI:** Es el motor fundacional (Retrieval) para construir asistentes de Inteligencia Artificial (RAG) que respondan preguntas basándose estrictamente en documentos corporativos, evitando alucinaciones.
-3. **Automatización de Compliance:** Reduce el tiempo que los analistas y agentes de servicio al cliente invierten buscando reglas en manuales de cientos de páginas.
+## 📖 Arquitectura Empresarial
+Evolución del motor de búsqueda semántica hacia una arquitectura escalable de producción. Se reemplazó el almacenamiento estático por **ChromaDB**, una base de datos vectorial dedicada, y se expuso el motor de Inteligencia Artificial mediante un microservicio REST con **FastAPI**.
 
-## 🎯 Objetivo del Proyecto
-Desarrollar un sistema de recuperación de información (Retrieval) utilizando Procesamiento de Lenguaje Natural (NLP) para transformar políticas de crédito en bases de datos vectoriales y procesar consultas humanas mediante similitud matemática.
+## 🛠 Tecnologías Implementadas
+* **Base de Datos Vectorial:** ChromaDB (Persistencia en disco para embeddings).
+* **Backend REST (MLOps):** FastAPI y Uvicorn.
+* **Procesamiento de Lenguaje (NLP):** `paraphrase-multilingual-MiniLM-L12-v2` (Hugging Face).
+* **Validación Estricta:** Pydantic.
 
-## 🛠 Metodología y Tecnologías
-Se implementó un pipeline de vectorización utilizando transformadores de Hugging Face y cálculo de distancias espaciales.
-* **Modelo de Lenguaje:** `paraphrase-multilingual-MiniLM-L12-v2` (Optimizado para entender semántica en español e inglés).
-* **Motor de Similitud:** Similitud Coseno (Cosine Similarity) vía Scikit-Learn.
-* **Base Vectorial:** Serialización de Embeddings utilizando Pickle para almacenamiento ultraligero y consultas en milisegundos.
-* **Librerías Clave:** Sentence-Transformers, Pandas, NumPy.
+## 🧠 Flujo del Sistema
+1. **Población (ETL Vectorial):** Script encargado de vectorizar normativas financieras y almacenarlas físicamente en la colección de ChromaDB.
+2. **Inferencia en Tiempo Real:** El endpoint `/buscar_normativa` recibe una duda del usuario, la vectoriza al instante, calcula la distancia espacial contra la base de datos y retorna el fragmento normativo exacto para ser inyectado a un LLM.
 
-## 🌍 Casos de Uso y Aplicaciones de Negocio
-Este motor vectorial rompe la dependencia de las palabras exactas al entender la "intención" del usuario. Su arquitectura es escalable a múltiples industrias:
-* **Atención al Cliente (Chatbots Seguros):** Extrae la política exacta para resolver dudas de clientes alimentando sistemas RAG conversacionales que no inventan datos.
-* **Legal Tech y Auditoría:** Búsqueda rápida de cláusulas en contratos o normativas financieras usando conceptos legales, sin depender de la jerga exacta.
-* **Sistemas de Tickets (IT / Helpdesk):** Conecta las descripciones coloquiales de fallas hechas por los usuarios con los manuales técnicos de diagnóstico de la empresa.
-* **E-commerce y Retail:** Muestra productos relevantes por asociación semántica (ej. buscar "ropa para la nieve" sugiere "chaquetas térmicas"), mejorando la conversión.
-* **Recursos Humanos:** Automatiza la consulta de manuales de empleado y agiliza el onboarding corporativo.
+## 🚀 Instrucciones de Ejecución
 
-## 🧠 Resultados y Aplicación de Negocio
-El motor logró mapear con éxito consultas coloquiales (ej. "dejar de pagar") hacia normativas técnicas específicas (ej. "mora superior a 90 días, cobro prejurídico"), alcanzando un nivel de confianza matemática superior al 55% en inferencia directa. Este sistema está listo para integrarse como la capa de recuperación de un modelo generativo mayor (LLM).
+### Opción A: Instalación por Primera Vez
+Si es la primera vez que descargas el proyecto, debes crear la base de datos vectorial.
+1. Instalar requerimientos: `pip install chromadb fastapi uvicorn sentence-transformers pydantic`
+2. Poblar la base de datos: `py 1_poblar_chromadb.py` (Esto creará la carpeta local `/chroma_datos`).
+3. Levantar el microservicio: `py -m uvicorn 2_api_rag:app --reload`
+
+### Opción B: Reinicio y Uso Diario
+Como ChromaDB guarda los datos de forma persistente, **no necesitas volver a ejecutar el script de población**. Para continuar trabajando en el día a día, simplemente levanta el servidor:
+1. Iniciar la API: `py -m uvicorn 2_api_rag:app --reload`
+2. Probar consultas en la interfaz web: `http://127.0.0.1:8000/docs`
